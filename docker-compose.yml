@@ -1,0 +1,73 @@
+services:
+  db:
+    image: mariadb:10.6
+    restart: always
+    container_name: ctr_test_db
+    environment:
+      - TZ=${TZ}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - vol_test_db:/var/lib/mysql
+    ports:
+      - "${DB_EXTERNAL_PORT}:${DB_PORT}"
+    networks:
+      - net_test
+
+  phpmyadmin:
+    image: phpmyadmin:5.2
+    restart: always
+    container_name: ctr_ceav_phpmyadmin
+    ports:
+      - "${PMY_EXTERNAL_PORT}:${PMY_PORT}"
+    environment:
+      - TZ=${TZ}
+      - PMA_HOST=${DB_HOST}
+      - PMA_PORT=${DB_PORT}
+      - PMA_ARBITRARY=1
+    depends_on:
+      - db
+    networks:
+      - net_test
+
+  server:
+    build:
+      context: ./server
+      dockerfile: DockerFile
+    image: img_test_server:1.0
+    restart: always
+    container_name: ctr_test
+    depends_on:
+      - db
+    environment:
+      - APP_NAME="${APP_NAME}"
+      - TZ=${TZ}
+      - APP_URL=${APP_URL}
+      - APP_ENV=${APP_ENV}
+      - APP_DEBUG=${APP_DEBUG}
+      - APP_KEY=${APP_KEY}
+      - DB_CONNECTION=${DB_CONNECTION}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./server:/var/www/html:rw
+      - ./server:/var/www/html:rw,uid=1000,gid=1000 
+    ports:
+      - "8000:80"
+    networks:
+      - net_test
+    #command: /bin/bash -c "if [ ! -d vendor ]; then composer install; fi && apache2-foreground"
+
+volumes:
+  vol_test_db:
+    name: vol_test_db
+
+networks:
+  net_test:
+    name: net_test
+    driver: bridge
