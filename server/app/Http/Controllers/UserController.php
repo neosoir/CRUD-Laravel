@@ -21,13 +21,14 @@ class UserController extends Controller
     }
 
     // Store a newly created resource in storage
-    public function store(Request $request)
+    public function store(Request $request) 
     {
         $request->validate([
             'name'      => 'required|string|max:255',
             'lastName'  => 'required|string|max:255',
             'email'     => 'required|email|unique:users,email',
             'phone'     => 'required|string|max:15',
+            'password'  => 'required|string|min:8',
         ]);
 
         User::create([
@@ -35,6 +36,7 @@ class UserController extends Controller
             'lastName'  => $request->lastName,
             'email'     => $request->email,
             'phone'     => $request->phone,
+            'password'  => bcrypt($request->password), // Encriptar la contraseña
         ]);
 
         return redirect()->route('users.index')->with('success', 'Usuario creado con éxito.');
@@ -60,14 +62,21 @@ class UserController extends Controller
             'lastName'  => 'required|string|max:255',
             'email'     => 'required|email|unique:users,email,' . $user->id,
             'phone'     => 'required|string|max:15',
+            'password'  => 'nullable|string|min:8',
         ]);
 
-        $user->update([
+        $data = [
             'name'      => $request->name,
             'lastName'  => $request->lastName,
             'email'     => $request->email,
             'phone'     => $request->phone,
-        ]);
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = bcrypt($request->password); // Encriptar la contraseña
+        }
+
+        $user->update($data);
 
         return redirect()->route('users.index')->with('success', 'Usuario actualizado con éxito.');
     }

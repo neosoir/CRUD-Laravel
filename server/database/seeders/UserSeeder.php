@@ -22,8 +22,6 @@ class UserSeeder extends Seeder
                 'email' => 'user' . $i . '@example.com',
                 'phone' => '123456789' . $i,
                 'password' => Hash::make('password123'), // Encripta la contraseña
-                'email_verified_at' => now(),
-                'remember_token' => Str::random(10),
             ]);
         }
     }
