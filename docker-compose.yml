@@ -19,7 +19,7 @@ services:
   phpmyadmin:
     image: phpmyadmin:5.2
     restart: always
-    container_name: ctr_ceav_phpmyadmin
+    container_name: ctr_phpmyadmin
     ports:
       - "${PMY_EXTERNAL_PORT}:${PMY_PORT}"
     environment:
@@ -61,7 +61,7 @@ services:
       - "8000:80"
     networks:
       - net_test
-    #command: /bin/bash -c "if [ ! -d vendor ]; then composer install; fi && apache2-foreground"
+    command: /bin/bash -c "if [ ! -d vendor ]; then composer install; fi && apache2-foreground"
 
 volumes:
   vol_test_db:
